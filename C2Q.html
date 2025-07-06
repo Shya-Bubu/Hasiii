@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Programming Quiz</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary-color: #bb86fc;
+            --secondary-color: #03dac6;
+            --error-color: #cf6679;
+            --success-color: #4caf50;
+            --border-color: #333;
+            --option-bg: #2a2a2a;
+            --option-hover: #3a3a3a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .quiz-container {
+            display: none;
+        }
+
+        .question-container {
+            margin-bottom: 2rem;
+        }
+
+        .difficulty-tag {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .basic {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .intermediate {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .advanced {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .option {
+            padding: 1rem;
+            background-color: var(--option-bg);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+        }
+
+        .option:hover {
+            background-color: var(--option-hover);
+        }
+
+        .option.correct {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .option.incorrect {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .explanation {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        .correct-explanation {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .incorrect-explanation {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #9b6bcc;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: #000;
+        }
+
+        .btn-secondary:hover {
+            background-color: #00b9a9;
+        }
+
+        .start-screen, .result-screen {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .result-screen {
+            display: none;
+        }
+
+        .score {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: var(--border-color);
+            border-radius: 5px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="start-screen">
+            <h1>Linear Programming Quiz</h1>
+            <p>Test your understanding of Linear Programming concepts from Chapter 2 with this comprehensive quiz.</p>
+            <button class="btn-primary" id="start-btn">Start Quiz</button>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress-bar"></div>
+            </div>
+            
+            <div class="question-container">
+                <div class="difficulty-tag" id="difficulty-tag"></div>
+                <div class="question-text" id="question-text"></div>
+                
+                <div class="options-container" id="options-container"></div>
+                
+                <div class="explanation correct-explanation" id="correct-explanation"></div>
+                <div class="explanation incorrect-explanation" id="incorrect-explanation"></div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn-secondary" id="prev-btn" disabled>Previous</button>
+                <button class="btn-primary" id="next-btn">Next</button>
+            </div>
+        </div>
+
+        <div class="result-screen" id="result-screen">
+            <h1>Quiz Completed!</h1>
+            <div class="score" id="final-score"></div>
+            <p id="result-message"></p>
+            <button class="btn-primary" id="restart-btn">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz questions data
+        const questions = [
+            // Basic Questions (1-10)
+            {
+                difficulty: "basic",
+                question: "What does the 'linear' in linear programming refer to?",
+                options: [
+                    "The proportional relationship between decision variables",
+                    "The straight-line graphs of the constraints",
+                    "The sequential nature of the solution process",
+                    "The use of line charts in presentation"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! 'Linear' refers to the proportional relationship between variables where doubling inputs exactly doubles outputs.",
+                    incorrect: "The term 'linear' specifically refers to the proportional relationships, not graph shapes or solution processes."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "Which of these is NOT a basic requirement for a linear programming problem?",
+                options: [
+                    "All variables must be integers",
+                    "There must be decision variables",
+                    "There must be an objective function",
+                    "There must be constraints"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! The divisibility assumption means variables can be fractional, not necessarily integers.",
+                    incorrect: "Decision variables, objective function, and constraints are all essential LP components."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "In the Reddy Mikks problem, what does X1 represent?",
+                options: [
+                    "Tons of exterior paint produced daily",
+                    "Tons of interior paint produced daily",
+                    "Profit from exterior paint",
+                    "Cost of raw material M1"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! X1 was defined as tons of exterior paint produced daily.",
+                    incorrect: "X2 represents interior paint, while X1 is specifically for exterior paint."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What is the objective function in the Reddy Mikks problem?",
+                options: [
+                    "Maximize z = 5X1 + 4X2",
+                    "Minimize z = 6X1 + 4X2",
+                    "Maximize z = 4X1 + 5X2",
+                    "Minimize z = X1 + X2"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! The profits are $5k per ton for exterior (X1) and $4k for interior (X2) paint.",
+                    incorrect: "The coefficients are reversed in some options, and it's a maximization problem."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "Which assumption implies that 10 units of a product yield exactly 10 times the profit of 1 unit?",
+                options: [
+                    "Proportionality",
+                    "Additivity",
+                    "Divisibility",
+                    "Certainty"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Proportionality means output is exactly proportional to input.",
+                    incorrect: "Additivity deals with combining activities, not proportional relationships."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What does the non-negativity constraint ensure?",
+                options: [
+                    "Decision variables cannot be negative",
+                    "Profits cannot be negative",
+                    "Constraints cannot be negative",
+                    "Slack variables cannot be negative"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Non-negativity means all decision variables ≥ 0.",
+                    incorrect: "While profits are typically positive, non-negativity specifically applies to decision variables."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "In the Reddy Mikks problem, what is the raw material M1 constraint?",
+                options: [
+                    "6X1 + 4X2 ≤ 24",
+                    "X1 + 2X2 ≤ 6",
+                    "X2 - X1 ≤ 1",
+                    "X2 ≤ 2"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Exterior paint uses 6 tons and interior 4 tons of M1, with 24 tons available.",
+                    incorrect: "The other options are the M2 constraint, market limit, and demand limit respectively."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "Which of these is NOT an LP assumption?",
+                options: [
+                    "Variables must be integers",
+                    "Parameters are known with certainty",
+                    "No interactions between activities",
+                    "Decision variables are continuous"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Divisibility assumption means variables can be fractional, not necessarily integers.",
+                    incorrect: "Certainty, additivity (no interactions), and continuity are all LP assumptions."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What does the 'programming' in linear programming mean?",
+                options: [
+                    "Planning of activities for optimal results",
+                    "Writing computer code",
+                    "Scheduling television shows",
+                    "Creating mathematical algorithms"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! In this context, 'programming' means planning activities, not computer programming.",
+                    incorrect: "While computers solve LPs, the term predates computer programming."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "Which step comes first in formulating an LP problem?",
+                options: [
+                    "Identify decision variables",
+                    "Write the objective function",
+                    "List all constraints",
+                    "Ensure non-negativity"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Step 1 is always to identify and define the decision variables.",
+                    incorrect: "Objective and constraints depend on knowing what the variables represent."
+                }
+            },
+
+            // Intermediate Questions (11-20)
+            {
+                difficulty: "intermediate",
+                question: "For the Reddy Mikks problem, is X1=3 and X2=1 a feasible solution?",
+                options: [
+                    "Yes, it satisfies all constraints",
+                    "No, it violates the M1 constraint",
+                    "No, it violates the M2 constraint",
+                    "No, it violates the market limit"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Testing in all constraints: 6(3)+4(1)=22≤24, 1(3)+2(1)=5≤6, 1-3=-2≤1, 1≤2.",
+                    incorrect: "This solution satisfies all constraints when checked individually."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "In the Reddy Mikks problem, what is the profit for X1=2 and X2=1.5?",
+                options: [
+                    "$16,000",
+                    "$15,000",
+                    "$17,000",
+                    "$14,500"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! 5(2) + 4(1.5) = 10 + 6 = 16 (in $1000s).",
+                    incorrect: "Calculation is 5×X1 + 4×X2, not other combinations."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "If the profit for exterior paint increased to $6,000/ton, how would the objective function change?",
+                options: [
+                    "Maximize z = 6X1 + 4X2",
+                    "Maximize z = 5X1 + 6X2",
+                    "Maximize z = 6X1 + 5X2",
+                    "Maximize z = 6X1 + 6X2"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Only the coefficient for X1 (exterior paint) would change from 5 to 6.",
+                    incorrect: "Only the exterior paint profit coefficient changes, interior remains at 4."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "In the medicines example (2.2), what would be the time constraint if medicine A took 4 hours per 1000 bottles instead of 3?",
+                options: [
+                    "4A + B ≤ 66",
+                    "3A + B ≤ 66",
+                    "4A + 2B ≤ 66",
+                    "A + 4B ≤ 66"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Time would be 4 hours per A and 1 hour per B (in 1000s), with 66 hours total.",
+                    incorrect: "The change only affects the coefficient for A, B's coefficient remains 1."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "What does the additivity assumption imply?",
+                options: [
+                    "Total resource usage is the sum of individual usages",
+                    "All variables must be added together",
+                    "Constraints must be additive",
+                    "Only addition operations can be used"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Additivity means no interactions between activities - total is simple sum.",
+                    incorrect: "It's about how activities combine, not operation restrictions."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "For the toy company (Ex 2.3), if type B dolls take 1.5 hours each (instead of twice type A), and type A takes 0.5 hours, what's the time constraint?",
+                options: [
+                    "0.5A + 1.5B ≤ 2000",
+                    "A + 2B ≤ 2000",
+                    "0.5A + 1B ≤ 2000",
+                    "1.5A + 0.5B ≤ 2000"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! New times are 0.5 for A and 1.5 for B, with 2000 total hours.",
+                    incorrect: "Must use the new production times given in the question."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "If a new constraint X1 ≥ 1 is added to the Reddy Mikks problem, what does this imply?",
+                options: [
+                    "At least 1 ton of exterior paint must be produced",
+                    "No more than 1 ton of exterior paint can be produced",
+                    "Exactly 1 ton of exterior paint must be produced",
+                    "The profit per ton of exterior paint increases"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! X1 ≥ 1 means minimum of 1 ton of exterior paint.",
+                    incorrect: "≥ means 'at least', not maximum or exact amount."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "In the Reddy Mikks problem, what does the constraint X2 ≤ 2 represent?",
+                options: [
+                    "Maximum daily demand for interior paint is 2 tons",
+                    "Minimum daily demand for interior paint is 2 tons",
+                    "Interior paint uses 2 tons of raw material",
+                    "Exterior paint cannot exceed interior paint by 2 tons"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! The problem states maximum daily demand for interior paint is 2 tons.",
+                    incorrect: "≤ indicates maximum limit, not minimum or material usage."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "Which of these solutions is INFEASIBLE for the Reddy Mikks problem?",
+                options: [
+                    "X1=4, X2=1",
+                    "X1=3, X2=1",
+                    "X1=2, X2=1.5",
+                    "X1=1, X2=1"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! X1=4, X2=1 violates M1 constraint: 6(4)+4(1)=28>24.",
+                    incorrect: "Other options satisfy all constraints when checked."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "If the Reddy Mikks problem had to produce exactly 1 ton more interior than exterior paint, how would the constraint change?",
+                options: [
+                    "X2 - X1 = 1",
+                    "X2 - X1 ≤ 1",
+                    "X1 - X2 = 1",
+                    "X1 + X2 = 1"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! 'Exactly 1 ton more' requires an equality constraint X2 = X1 + 1.",
+                    incorrect: "= is needed for exact difference, not inequality."
+                }
+            },
+
+            // Advanced Questions (21-30)
+            {
+                difficulty: "advanced",
+                question: "For the medicines problem (Ex 2.2), if the profit for medicine B increases to Rs. 8/bottle while A remains Rs. 8, how does the objective change?",
+                options: [
+                    "Maximize 8A + 8B",
+                    "Maximize 8A + 7B",
+                    "Maximize 7A + 8B",
+                    "Maximize 8A + 6B"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Both medicines would then have Rs. 8 profit per bottle.",
+                    incorrect: "Only B's coefficient changes to match A's."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What would happen if the Reddy Mikks problem's M1 availability increased to 30 tons?",
+                options: [
+                    "The feasible region would expand",
+                    "The feasible region would shrink",
+                    "The optimal solution would definitely change",
+                    "The problem would become infeasible"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! More resources typically expand the feasible region of possible solutions.",
+                    incorrect: "While the solution might change, the immediate effect is feasible region expansion."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "If the toy company (Ex 2.3) could get 100 more fancy dresses, how would this affect constraints?",
+                options: [
+                    "B ≤ 700 instead of B ≤ 600",
+                    "A + B ≤ 1600",
+                    "B ≥ 700",
+                    "A ≤ 700"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Fancy dresses limit deluxe dolls (B), so constraint would increase by 100.",
+                    incorrect: "Only the deluxe doll constraint (B) is affected by fancy dress availability."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "In the Reddy Mikks problem, if interior paint demand doubled to 4 tons maximum, which constraint changes?",
+                options: [
+                    "X2 ≤ 4",
+                    "X2 - X1 ≤ 2",
+                    "6X1 + 4X2 ≤ 48",
+                    "X1 ≥ 4"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! The demand limit constraint would double from X2 ≤ 2 to X2 ≤ 4.",
+                    incorrect: "Only the interior paint demand constraint changes, not others."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "Which assumption is violated if setup time between products is significant?",
+                options: [
+                    "Additivity",
+                    "Proportionality",
+                    "Divisibility",
+                    "Certainty"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Additivity assumes no interaction/setup time between products.",
+                    incorrect: "Setup times affect how activities combine (additivity), not other assumptions."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "If the Reddy Mikks problem required integer tons of paint, which assumption would be violated?",
+                options: [
+                    "Divisibility",
+                    "Proportionality",
+                    "Additivity",
+                    "Certainty"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Divisibility allows fractional solutions; integer requirements violate this.",
+                    incorrect: "Other assumptions aren't directly affected by integer requirements."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "For the medicines problem (Ex 2.2), if only 40,000 total bottles could be filled (instead of 45,000), how would the constraint change?",
+                options: [
+                    "A + B ≤ 40",
+                    "A ≤ 20, B ≤ 20",
+                    "A + B ≥ 40",
+                    "A ≤ 40, B ≤ 40"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Bottle filling constraint would become A + B ≤ 40 (in 1000s).",
+                    incorrect: "The total bottles constraint is simply the sum, with new lower limit."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "If the Reddy Mikks problem had a minimum profit requirement of $10,000, how would this be modeled?",
+                options: [
+                    "5X1 + 4X2 ≥ 10",
+                    "5X1 + 4X2 ≤ 10",
+                    "X1 + X2 ≥ 10",
+                    "Add a new decision variable"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! The profit constraint would be the objective function ≥ 10 (in $1000s).",
+                    incorrect: "Minimum profit uses the same coefficients as objective with ≥ inequality."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "In the toy company (Ex 2.3), if plastic supply increased to 2000 dolls/day, how would the plastic constraint change?",
+                options: [
+                    "A + B ≤ 2000",
+                    "A + B ≥ 2000",
+                    "A ≤ 1500, B ≤ 500",
+                    "2A + B ≤ 2000"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! The plastic constraint is simply the sum of both doll types ≤ new limit.",
+                    incorrect: "The constraint remains a simple sum with the new higher limit."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What would be the market constraint if interior paint demand couldn't be less than exterior paint by more than 1 ton?",
+                options: [
+                    "X1 - X2 ≤ 1",
+                    "X2 - X1 ≤ 1",
+                    "X1 + X2 ≤ 1",
+                    "X1 ≥ X2 - 1"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! 'Interior not less than exterior by more than 1' translates to X1 - X2 ≤ 1.",
+                    incorrect: "This reverses the original constraint to handle the opposite relationship."
+                }
+            }
+        ];
+
+        // Randomize the correct answers
+        questions.forEach(q => {
+            const correctOption = q.options[q.correctAnswer];
+            // Shuffle options
+            for (let i = q.options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+            }
+            // Update correct answer index
+            q.correctAnswer = q.options.indexOf(correctOption);
+        });
+
+        // Quiz state variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = Array(questions.length).fill(null);
+        let quizStarted = false;
+
+        // DOM elements
+        const startScreen = document.querySelector('.start-screen');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const difficultyTag = document.getElementById('difficulty-tag');
+        const correctExplanation = document.getElementById('correct-explanation');
+        const incorrectExplanation = document.getElementById('incorrect-explanation');
+        const progressBar = document.getElementById('progress-bar');
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        // Initialize the quiz
+        function initQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = Array(questions.length).fill(null);
+            loadQuestion();
+            updateProgressBar();
+            updateNavigationButtons();
+        }
+
+        // Load the current question
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            
+            // Set question text and difficulty
+            questionText.textContent = question.question;
+            difficultyTag.textContent = question.difficulty;
+            difficultyTag.className = 'difficulty-tag ' + question.difficulty;
+            
+            // Clear previous options and explanations
+            optionsContainer.innerHTML = '';
+            correctExplanation.style.display = 'none';
+            incorrectExplanation.style.display = 'none';
+            
+            // Create options
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.textContent = option;
+                optionElement.dataset.index = index;
+                
+                // Highlight if already answered
+                if (userAnswers[currentQuestionIndex] !== null) {
+                    if (index === question.correctAnswer) {
+                        optionElement.classList.add('correct');
+                    } else if (index === userAnswers[currentQuestionIndex] && index !== question.correctAnswer) {
+                        optionElement.classList.add('incorrect');
+                    }
+                }
+                
+                optionElement.addEventListener('click', () => selectOption(index));
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Show explanations if already answered
+            if (userAnswers[currentQuestionIndex] !== null) {
+                showExplanations();
+            }
+        }
+
+        // Handle option selection
+        function selectOption(optionIndex) {
+            // Only allow selection if not already answered
+            if (userAnswers[currentQuestionIndex] !== null) return;
+            
+            const question = questions[currentQuestionIndex];
+            userAnswers[currentQuestionIndex] = optionIndex;
+            
+            // Update score if correct
+            if (optionIndex === question.correctAnswer) {
+                score++;
+            }
+            
+            // Highlight selected option
+            const options = document.querySelectorAll('.option');
+            options.forEach((option, index) => {
+                if (index === optionIndex) {
+                    option.classList.add(index === question.correctAnswer ? 'correct' : 'incorrect');
+                }
+                if (index === question.correctAnswer && index !== optionIndex) {
+                    option.classList.add('correct');
+                }
+            });
+            
+            // Show explanations
+            showExplanations();
+            updateProgressBar();
+            updateNavigationButtons();
+        }
+
+        // Show explanations for the current question
+        function showExplanations() {
+            const question = questions[currentQuestionIndex];
+            const userAnswer = userAnswers[currentQuestionIndex];
+            
+            correctExplanation.textContent = question.explanation.correct;
+            correctExplanation.style.display = 'block';
+            
+            if (userAnswer !== question.correctAnswer) {
+                incorrectExplanation.textContent = question.explanation.incorrect;
+                incorrectExplanation.style.display = 'block';
+            }
+        }
+
+        // Update navigation buttons state
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.textContent = 'Finish';
+            } else {
+                nextBtn.textContent = 'Next';
+            }
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const answeredCount = userAnswers.filter(answer => answer !== null).length;
+            const progress = (answeredCount / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Show quiz results
+        function showResults() {
+            const percentage = Math.round((score / questions.length) * 100);
+            finalScore.textContent = `${score}/${questions.length} (${percentage}%)`;
+            
+            if (percentage >= 80) {
+                resultMessage.textContent = 'LP Expert! You have mastered Linear Programming concepts.';
+            } else if (percentage >= 60) {
+                resultMessage.textContent = 'Strong performance! You understand most LP concepts but could review some areas.';
+            } else if (percentage >= 40) {
+                resultMessage.textContent = 'Good effort! Focus on the explanations to improve your LP knowledge.';
+            } else {
+                resultMessage.textContent = 'Keep studying! Review Chapter 2 materials and try again.';
+            }
+            
+            quizContainer.style.display = 'none';
+            resultScreen.style.display = 'block';
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            startScreen.style.display = 'none';
+            quizContainer.style.display = 'block';
+            quizStarted = true;
+            initQuiz();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                updateNavigationButtons();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                updateNavigationButtons();
+            } else {
+                showResults();
+            }
+        });
+
+        restartBtn.addEventListener('click', () => {
+            resultScreen.style.display = 'none';
+            initQuiz();
+        });
+
+        // Initialize
+        if (!quizStarted) {
+            startScreen.style.display = 'block';
+            quizContainer.style.display = 'none';
+            resultScreen.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
