@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operations Research Mastery Quiz</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary-color: #bb86fc;
+            --secondary-color: #03dac6;
+            --error-color: #cf6679;
+            --success-color: #4caf50;
+            --border-color: #333;
+            --option-bg: #2a2a2a;
+            --option-hover: #3a3a3a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .quiz-container {
+            display: none;
+        }
+
+        .question-container {
+            margin-bottom: 2rem;
+        }
+
+        .difficulty-tag {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .basic {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .intermediate {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .advanced {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .option {
+            padding: 1rem;
+            background-color: var(--option-bg);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+        }
+
+        .option:hover {
+            background-color: var(--option-hover);
+        }
+
+        .option.correct {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .option.incorrect {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .explanation {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        .correct-explanation {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .incorrect-explanation {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #9b6bcc;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: #000;
+        }
+
+        .btn-secondary:hover {
+            background-color: #00b9a9;
+        }
+
+        .start-screen, .result-screen {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .result-screen {
+            display: none;
+        }
+
+        .score {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: var(--border-color);
+            border-radius: 5px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="start-screen">
+            <h1>Operations Research Mastery Quiz</h1>
+            <p>Test your understanding of Operations Research with this comprehensive quiz covering basic, intermediate, and advanced concepts from the provided material.</p>
+            <button class="btn-primary" id="start-btn">Start Quiz</button>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress-bar"></div>
+            </div>
+            
+            <div class="question-container">
+                <div class="difficulty-tag" id="difficulty-tag"></div>
+                <div class="question-text" id="question-text"></div>
+                
+                <div class="options-container" id="options-container"></div>
+                
+                <div class="explanation correct-explanation" id="correct-explanation"></div>
+                <div class="explanation incorrect-explanation" id="incorrect-explanation"></div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn-secondary" id="prev-btn" disabled>Previous</button>
+                <button class="btn-primary" id="next-btn">Next</button>
+            </div>
+        </div>
+
+        <div class="result-screen" id="result-screen">
+            <h1>Quiz Completed!</h1>
+            <div class="score" id="final-score"></div>
+            <p id="result-message"></p>
+            <button class="btn-primary" id="restart-btn">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz questions data
+        const questions = [
+            // Basic Questions (1-10)
+            {
+                difficulty: "basic",
+                question: "What is the primary goal of Operations Research (OR)?",
+                options: [
+                    "To provide rational bases for decision making through optimal resource allocation",
+                    "To develop new mathematical theories without practical applications",
+                    "To replace human decision makers with automated systems",
+                    "To focus solely on military applications"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF states that the goal of OR is to provide rational bases for decision making by seeking to understand and structure complex situations.",
+                    incorrect: "OR aims to support decision making, not replace humans, and has applications beyond just military uses."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "Where did formal Operations Research activities originate?",
+                options: [
+                    "England during World War II",
+                    "United States during the Cold War",
+                    "Germany in the 19th century",
+                    "Japan during the industrial revolution"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF clearly states that formal OR activities were initiated in England during World War II.",
+                    incorrect: "While OR was later adapted in other countries, it originated in England during WWII."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "Which of these is NOT a synonym for Operations Research?",
+                options: [
+                    "Computer Science",
+                    "Management Science",
+                    "Operational Research",
+                    "Decision Science"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Computer Science is a different field, while the other terms are mentioned in the PDF as synonyms for OR.",
+                    incorrect: "The PDF lists Management Science, Operational Research, and Decision Science as terms used for OR."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What is a key characteristic of a good OR model?",
+                options: [
+                    "It should be capable of taking new formulations without changing its frame",
+                    "It must perfectly represent reality in all details",
+                    "It should use as many variables as possible",
+                    "It must be constructed quickly without much thought"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF lists this as the first characteristic of a good model - flexibility to accommodate new formulations.",
+                    incorrect: "Models are simplifications of reality and should be simple with few variables, not overly complex."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "Which of these fields is NOT mentioned as contributing to OR's multidisciplinary nature?",
+                options: [
+                    "Biology",
+                    "Mathematics",
+                    "Statistics",
+                    "Psychology"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Biology is not mentioned in the PDF, while mathematics, statistics, and psychology are listed as contributing fields.",
+                    incorrect: "The PDF specifically mentions mathematics, statistics, engineering, economics, and psychology as contributing disciplines."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What was the original application area of OR?",
+                options: [
+                    "Military operations and war material utilization",
+                    "Industrial production optimization",
+                    "Agricultural planning",
+                    "Financial market analysis"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF states OR originated with British scientists making decisions about war material utilization during WWII.",
+                    incorrect: "Other applications came later after military origins."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "Which of these is NOT one of the main fields where OR is extensively used?",
+                options: [
+                    "Fashion design",
+                    "National planning and budgeting",
+                    "Defense services",
+                    "Transportation"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Fashion design is not mentioned in the PDF's list of fields where OR is used.",
+                    incorrect: "The PDF specifically lists national planning, defense, and transportation as application areas."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What is the first step in the OR study process?",
+                options: [
+                    "Observe the problem environment",
+                    "Develop a mathematical model",
+                    "Collect data",
+                    "Implement the solution"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF lists observation of the problem environment as Step I in the OR study process.",
+                    incorrect: "Model development and data collection come later in the process."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "Which OR technique is mentioned for deriving solutions from models?",
+                options: [
+                    "Monte Carlo Method",
+                    "Genetic Algorithms",
+                    "Neural Networks",
+                    "Fuzzy Logic"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF specifically mentions the Monte Carlo Method as one way to derive solutions.",
+                    incorrect: "The other techniques are not mentioned in the PDF's section on solution derivation."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What is the purpose of sensitivity analysis in OR?",
+                options: [
+                    "To test how changes in variables affect the system",
+                    "To determine the most sensitive employee in an organization",
+                    "To analyze emotional responses to decisions",
+                    "To measure physical sensitivity of materials"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF describes sensitivity analysis as testing how well the model predicts effects of changes in control variables.",
+                    incorrect: "Sensitivity analysis in OR deals with system variables, not people or materials."
+                }
+            },
+
+            // Intermediate Questions (11-20)
+            {
+                difficulty: "intermediate",
+                question: "In the ticket purchase example, which alternative was the most cost-effective?",
+                options: [
+                    "Alternative 3 at $1600",
+                    "Alternative 1 at $2000",
+                    "Alternative 2 at $1880",
+                    "All alternatives cost the same"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF shows calculations proving Alternative 3 was cheapest at $1600.",
+                    incorrect: "The calculations clearly show different costs for each alternative."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "In the wire rectangle problem, what shape gives maximum area?",
+                options: [
+                    "Square",
+                    "Rectangle with 2:1 width:height ratio",
+                    "Long thin rectangle",
+                    "The shape doesn't affect the area"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF's solution shows w = h = L/4, which is a square.",
+                    incorrect: "The mathematical proof in the PDF demonstrates the square gives maximum area."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "Which phase of OR involves developing mathematical expressions for objectives and constraints?",
+                options: [
+                    "Develop a Model",
+                    "Observe the Problem Environment",
+                    "Selection of Data Input",
+                    "Establishing control over the solution"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Step III in the PDF is 'Develop a Model' which involves creating mathematical expressions.",
+                    incorrect: "Model development comes after observation and before data selection in the OR process."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "What is the key reason for establishing controls over an OR solution?",
+                options: [
+                    "Because the solution remains valid only if variables retain their values",
+                    "To limit access to the solution",
+                    "To make the solution more complex",
+                    "Because all solutions need governmental approval"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF states controls are needed because solutions remain valid only while variables retain their values.",
+                    incorrect: "Controls are about solution reliability, not access or complexity."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "In the elevator problem solution, what was the key insight?",
+                options: [
+                    "Human psychology could solve the problem more simply than mathematical modeling",
+                    "More elevators were needed",
+                    "A complex queuing model was required",
+                    "Employees needed to be retrained"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF shows how a psychological solution (mirrors) worked better than mathematical modeling.",
+                    incorrect: "The solution was simple and non-mathematical, contrary to some options."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "What is the purpose of testing an OR model?",
+                options: [
+                    "To determine how well it predicts system behavior under changes",
+                    "To prove the model is perfect",
+                    "To make the model more complex",
+                    "To satisfy academic requirements"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF states testing determines how well the model predicts effects of changes (sensitivity analysis).",
+                    incorrect: "Models are never perfect representations, and complexity isn't the goal."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "Why is OR considered multidisciplinary?",
+                options: [
+                    "It takes tools from mathematics, statistics, engineering, economics, psychology etc.",
+                    "It requires experts from every possible field",
+                    "It was developed simultaneously in multiple disciplines",
+                    "It can solve every type of problem"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF specifically mentions OR takes tools from various disciplines.",
+                    incorrect: "While multidisciplinary, OR doesn't require all experts or solve all problems."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "What was the key factor in the elevator problem that made mirrors an effective solution?",
+                options: [
+                    "They occupied people's attention while waiting",
+                    "They made the lobby brighter",
+                    "They created an illusion of more space",
+                    "They helped people check their appearance"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF explains mirrors worked by keeping people occupied watching themselves and others.",
+                    incorrect: "While other effects might occur, the key was occupying waiting time psychologically."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "In the Tyko Manufacturing Company example, what does the model need to balance?",
+                options: [
+                    "Conflicting aspects like production rate and consumption rate",
+                    "Worker salaries and benefits",
+                    "Different product designs",
+                    "Marketing and production departments"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF mentions the model needs to balance conflicting parts like production and consumption rates.",
+                    incorrect: "The example focuses on production/inventory balance, not other factors."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "What is the final step in the OR study process?",
+                options: [
+                    "Implementation",
+                    "Testing the model",
+                    "Deriving solutions",
+                    "Defining the problem"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Step VIII in the PDF is Implementation, the final step.",
+                    incorrect: "Implementation comes after all other steps in the process."
+                }
+            },
+
+            // Advanced Questions (21-30)
+            {
+                difficulty: "advanced",
+                question: "Why might an optimal solution from an OR model not be optimal in reality?",
+                options: [
+                    "Because the model is an approximation of the real system",
+                    "Because reality doesn't have optimal solutions",
+                    "Because OR analysts always make mistakes",
+                    "Because mathematical models are always wrong"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF states that since models are approximations, their optimal solutions may not perfectly match reality.",
+                    incorrect: "Models can be useful approximations even if not perfect, and analysts don't always make mistakes."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What is the key lesson from the elevator problem for OR practitioners?",
+                options: [
+                    "Non-mathematical solutions may sometimes be more effective than complex models",
+                    "All problems require complex mathematical modeling",
+                    "Human psychology is irrelevant in OR",
+                    "Mirrors solve all queuing problems"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF emphasizes that simple, non-mathematical solutions can sometimes be best.",
+                    incorrect: "The example shows psychology can be relevant and not all problems need complex models."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "In the wire rectangle problem, why is the square the optimal shape?",
+                options: [
+                    "Because it maximizes area for a given perimeter (isoperimetric property)",
+                    "Because squares are easier to construct",
+                    "Because the problem specified squares only",
+                    "Because circles weren't an option"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The mathematical solution in the PDF shows the square maximizes area for given perimeter.",
+                    incorrect: "The optimality comes from mathematical properties, not convenience or constraints."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What is the significance of the 'interdisciplinary team' aspect in OR definitions?",
+                options: [
+                    "Complex problems often require multiple perspectives and expertise",
+                    "OR was developed by large committees",
+                    "It makes OR projects more expensive",
+                    "No single person can understand OR"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF's definitions emphasize that complex problems benefit from diverse expertise.",
+                    incorrect: "The team aspect is about effectiveness, not cost or individual limitations."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "Why is implementation considered a separate phase in OR studies?",
+                options: [
+                    "Because explaining solutions to decision-makers requires special attention",
+                    "Because OR analysts don't understand real-world problems",
+                    "Because solutions never work without modification",
+                    "Because it's the most mathematical phase"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF mentions implementation involves careful explanation to connect solutions with operating realities.",
+                    incorrect: "Implementation is about communication and monitoring, not about analysts' limitations."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What distinguishes OR from regular problem-solving?",
+                options: [
+                    "Its systematic, scientific approach using mathematical modeling",
+                    "It always produces perfect solutions",
+                    "It only deals with military problems",
+                    "It avoids using quantitative methods"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF emphasizes OR's scientific approach using mathematical and quantitative techniques.",
+                    incorrect: "OR has civilian applications, doesn't promise perfect solutions, and relies on quantitative methods."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "Why might a company use OR for production planning?",
+                options: [
+                    "To optimize resource allocation and improve efficiency",
+                    "Because it's required by law",
+                    "To make their operations more complex",
+                    "To replace all human decision-makers"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF shows OR helps optimize resources and improve efficiency in industrial establishments.",
+                    incorrect: "OR supports decision-making but doesn't replace humans or add unnecessary complexity."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "How does OR contribute to national planning according to the PDF?",
+                options: [
+                    "By helping with Five Year Plans, budgets, and major project scheduling",
+                    "By making all government decisions",
+                    "By replacing political processes",
+                    "By focusing only on military planning"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF specifically mentions OR's role in national planning activities like Five Year Plans.",
+                    incorrect: "OR supports but doesn't replace political or governmental processes."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What is the role of 'authentic and appropriate data' in OR?",
+                options: [
+                    "Without it, model results cannot be trusted",
+                    "It makes models unnecessary",
+                    "It guarantees perfect solutions",
+                    "It's only needed for military applications"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF states that without proper data, OR model results cannot be trusted.",
+                    incorrect: "Data supports models but doesn't eliminate their need or guarantee perfection."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "Why is OR described as a 'decision-making tool'?",
+                options: [
+                    "It provides quantitative bases for decisions but doesn't make the decisions itself",
+                    "It automatically implements decisions without human input",
+                    "It only describes past decisions",
+                    "It removes all uncertainty from decisions"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "The PDF positions OR as providing rational bases for decision-making, not making decisions automatically.",
+                    incorrect: "OR supports but doesn't replace human decision-makers or eliminate all uncertainty."
+                }
+            }
+        ];
+
+        // Randomize the correct answers
+        questions.forEach(q => {
+            const correctOption = q.options[q.correctAnswer];
+            // Shuffle options
+            for (let i = q.options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+            }
+            // Update correct answer index
+            q.correctAnswer = q.options.indexOf(correctOption);
+        });
+
+        // Quiz state variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = Array(questions.length).fill(null);
+        let quizStarted = false;
+
+        // DOM elements
+        const startScreen = document.querySelector('.start-screen');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const difficultyTag = document.getElementById('difficulty-tag');
+        const correctExplanation = document.getElementById('correct-explanation');
+        const incorrectExplanation = document.getElementById('incorrect-explanation');
+        const progressBar = document.getElementById('progress-bar');
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        // Initialize the quiz
+        function initQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = Array(questions.length).fill(null);
+            loadQuestion();
+            updateProgressBar();
+            updateNavigationButtons();
+        }
+
+        // Load the current question
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            
+            // Set question text and difficulty
+            questionText.textContent = question.question;
+            difficultyTag.textContent = question.difficulty;
+            difficultyTag.className = 'difficulty-tag ' + question.difficulty;
+            
+            // Clear previous options and explanations
+            optionsContainer.innerHTML = '';
+            correctExplanation.style.display = 'none';
+            incorrectExplanation.style.display = 'none';
+            
+            // Create options
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.textContent = option;
+                optionElement.dataset.index = index;
+                
+                // Highlight if already answered
+                if (userAnswers[currentQuestionIndex] !== null) {
+                    if (index === question.correctAnswer) {
+                        optionElement.classList.add('correct');
+                    } else if (index === userAnswers[currentQuestionIndex] && index !== question.correctAnswer) {
+                        optionElement.classList.add('incorrect');
+                    }
+                }
+                
+                optionElement.addEventListener('click', () => selectOption(index));
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Show explanations if already answered
+            if (userAnswers[currentQuestionIndex] !== null) {
+                showExplanations();
+            }
+        }
+
+        // Handle option selection
+        function selectOption(optionIndex) {
+            // Only allow selection if not already answered
+            if (userAnswers[currentQuestionIndex] !== null) return;
+            
+            const question = questions[currentQuestionIndex];
+            userAnswers[currentQuestionIndex] = optionIndex;
+            
+            // Update score if correct
+            if (optionIndex === question.correctAnswer) {
+                score++;
+            }
+            
+            // Highlight selected option
+            const options = document.querySelectorAll('.option');
+            options.forEach((option, index) => {
+                if (index === optionIndex) {
+                    option.classList.add(index === question.correctAnswer ? 'correct' : 'incorrect');
+                }
+                if (index === question.correctAnswer && index !== optionIndex) {
+                    option.classList.add('correct');
+                }
+            });
+            
+            // Show explanations
+            showExplanations();
+            updateProgressBar();
+            updateNavigationButtons();
+        }
+
+        // Show explanations for the current question
+        function showExplanations() {
+            const question = questions[currentQuestionIndex];
+            const userAnswer = userAnswers[currentQuestionIndex];
+            
+            correctExplanation.textContent = question.explanation.correct;
+            correctExplanation.style.display = 'block';
+            
+            if (userAnswer !== question.correctAnswer) {
+                incorrectExplanation.textContent = question.explanation.incorrect;
+                incorrectExplanation.style.display = 'block';
+            }
+        }
+
+        // Update navigation buttons state
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.textContent = 'Finish';
+            } else {
+                nextBtn.textContent = 'Next';
+            }
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const answeredCount = userAnswers.filter(answer => answer !== null).length;
+            const progress = (answeredCount / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Show quiz results
+        function showResults() {
+            const percentage = Math.round((score / questions.length) * 100);
+            finalScore.textContent = `${score}/${questions.length} (${percentage}%)`;
+            
+            if (percentage >= 80) {
+                resultMessage.textContent = 'OR Master! You have an exceptional understanding of Operations Research.';
+            } else if (percentage >= 60) {
+                resultMessage.textContent = 'Strong performance! You understand most OR concepts but could review some areas.';
+            } else if (percentage >= 40) {
+                resultMessage.textContent = 'Good effort! Focus on the explanations to deepen your OR knowledge.';
+            } else {
+                resultMessage.textContent = 'Keep studying! Review the materials and try again - OR takes practice!';
+            }
+            
+            quizContainer.style.display = 'none';
+            resultScreen.style.display = 'block';
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            startScreen.style.display = 'none';
+            quizContainer.style.display = 'block';
+            quizStarted = true;
+            initQuiz();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                updateNavigationButtons();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                updateNavigationButtons();
+            } else {
+                showResults();
+            }
+        });
+
+        restartBtn.addEventListener('click', () => {
+            resultScreen.style.display = 'none';
+            initQuiz();
+        });
+
+        // Initialize
+        if (!quizStarted) {
+            startScreen.style.display = 'block';
+            quizContainer.style.display = 'none';
+            resultScreen.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
