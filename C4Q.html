@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simplex Method Mastery Quiz</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary-color: #bb86fc;
+            --secondary-color: #03dac6;
+            --error-color: #cf6679;
+            --success-color: #4caf50;
+            --border-color: #333;
+            --option-bg: #2a2a2a;
+            --option-hover: #3a3a3a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .quiz-container {
+            display: none;
+        }
+
+        .question-container {
+            margin-bottom: 2rem;
+        }
+
+        .difficulty-tag {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .basic {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .intermediate {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .advanced {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .option {
+            padding: 1rem;
+            background-color: var(--option-bg);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+        }
+
+        .option:hover {
+            background-color: var(--option-hover);
+        }
+
+        .option.correct {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .option.incorrect {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .explanation {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        .correct-explanation {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .incorrect-explanation {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #9b6bcc;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: #000;
+        }
+
+        .btn-secondary:hover {
+            background-color: #00b9a9;
+        }
+
+        .start-screen, .result-screen {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .result-screen {
+            display: none;
+        }
+
+        .score {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: var(--border-color);
+            border-radius: 5px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="start-screen">
+            <h1>Simplex Method Mastery Quiz</h1>
+            <p>Test your understanding of the Simplex Method in Linear Programming with this comprehensive quiz.</p>
+            <button class="btn-primary" id="start-btn">Start Quiz</button>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress-bar"></div>
+            </div>
+            
+            <div class="question-container">
+                <div class="difficulty-tag" id="difficulty-tag"></div>
+                <div class="question-text" id="question-text"></div>
+                
+                <div class="options-container" id="options-container"></div>
+                
+                <div class="explanation correct-explanation" id="correct-explanation"></div>
+                <div class="explanation incorrect-explanation" id="incorrect-explanation"></div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn-secondary" id="prev-btn" disabled>Previous</button>
+                <button class="btn-primary" id="next-btn">Next</button>
+            </div>
+        </div>
+
+        <div class="result-screen" id="result-screen">
+            <h1>Quiz Completed!</h1>
+            <div class="score" id="final-score"></div>
+            <p id="result-message"></p>
+            <button class="btn-primary" id="restart-btn">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz questions data
+        const questions = [
+            // Basic Questions (1-10)
+            {
+                difficulty: "basic",
+                question: "What is added to ≤ constraints to convert them to equations in standard form?",
+                options: [
+                    "Slack variables",
+                    "Surplus variables",
+                    "Artificial variables",
+                    "Dummy variables"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Slack variables represent unused resources in ≤ constraints.",
+                    incorrect: "Surplus variables are used for ≥ constraints, while artificial variables are for = or ≥ constraints."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What is subtracted from ≥ constraints to convert them to equations?",
+                options: [
+                    "Surplus variables",
+                    "Slack variables",
+                    "Artificial variables",
+                    "Decision variables"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Surplus variables represent how much the solution exceeds minimum requirements.",
+                    incorrect: "Slack variables are used for ≤ constraints, not ≥ constraints."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What coefficient is assigned to artificial variables in maximization problems?",
+                options: [
+                    "-M (where M is large)",
+                    "0",
+                    "1",
+                    "Same as decision variables"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! The large negative penalty ensures artificial variables leave the basis quickly.",
+                    incorrect: "Artificial variables must be penalized heavily to avoid appearing in final solutions."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "In the initial simplex tableau, what variables typically form the basis?",
+                options: [
+                    "Slack and artificial variables",
+                    "Decision variables",
+                    "Only slack variables",
+                    "Only artificial variables"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! The initial basis consists of slack variables for ≤ constraints and artificial variables for = or ≥ constraints.",
+                    incorrect: "Decision variables only enter the basis during later iterations of the simplex method."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What does the Zj row represent in the simplex tableau?",
+                options: [
+                    "Profit reduction when bringing one unit of variable j into solution",
+                    "Total profit of current solution",
+                    "Coefficients of constraints",
+                    "Reduced costs of basic variables"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Zj shows the opportunity cost of introducing one unit of each variable.",
+                    incorrect: "Zj is calculated differently from the objective function and represents opportunity costs."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What indicates an optimal solution in simplex method for maximization?",
+                options: [
+                    "All Cj - Zj ≤ 0",
+                    "All Zj = 0",
+                    "All slack variables are zero",
+                    "All artificial variables left the basis"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! When no variable can improve the objective (all Cj - Zj ≤ 0), we've reached optimum.",
+                    incorrect: "Optimality is determined by the Cj - Zj row, not just basis variables."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What is the coefficient of slack/surplus variables in the objective function?",
+                options: [
+                    "0",
+                    "1",
+                    "M (a large number)",
+                    "Same as decision variables"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Slack/surplus variables represent unused resources or excess, contributing nothing to the objective.",
+                    incorrect: "Only decision variables have non-zero coefficients in the original objective function."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What is the purpose of artificial variables?",
+                options: [
+                    "To provide initial basic feasible solution for = or ≥ constraints",
+                    "To represent unused resources",
+                    "To handle negative decision variables",
+                    "To maximize the objective function"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Artificial variables help start the simplex method when no obvious initial solution exists.",
+                    incorrect: "Artificial variables are temporary aids, not representations of resources or decision variables."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "How is the entering variable selected in maximization problems?",
+                options: [
+                    "Largest positive Cj - Zj value",
+                    "Largest Zj value",
+                    "Smallest Cj - Zj value",
+                    "Variable with most constraints"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! The largest positive Cj - Zj indicates the greatest potential improvement per unit.",
+                    incorrect: "We select the variable that offers the most improvement to the objective function."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What indicates multiple optimal solutions in simplex method?",
+                options: [
+                    "Cj - Zj = 0 for a non-basic variable at optimality",
+                    "All Cj - Zj < 0",
+                    "An artificial variable in the basis",
+                    "Negative values in solution column"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Zero Cj - Zj for non-basic variables means alternative solutions exist at same optimal value.",
+                    incorrect: "Multiple optima are indicated by zero reduced costs, not negative or artificial variables."
+                }
+            },
+
+            // Intermediate Questions (11-20)
+            {
+                difficulty: "intermediate",
+                question: "For the constraint 3X1 + 2X2 ≤ 18, what would be the standard form equation?",
+                options: [
+                    "3X1 + 2X2 + S1 = 18",
+                    "3X1 + 2X2 - S1 = 18",
+                    "3X1 + 2X2 = 18 + S1",
+                    "3X1 + 2X2 + A1 = 18"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! A slack variable S1 is added to convert ≤ to =.",
+                    incorrect: "Only slack variables are added to ≤ constraints, with + sign."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "For the constraint 5X1 + 4X2 ≥ 20, what would be the standard form equation?",
+                options: [
+                    "5X1 + 4X2 - S1 = 20",
+                    "5X1 + 4X2 + S1 = 20",
+                    "5X1 + 4X2 + A1 = 20",
+                    "5X1 + 4X2 = 20"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! A surplus variable S1 is subtracted to convert ≥ to =.",
+                    incorrect: "Surplus variables are subtracted, not added, for ≥ constraints."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "In the initial tableau for Maximize Z = 3X1 + 5X2, what would be Cj for S1 (slack variable)?",
+                options: [
+                    "0",
+                    "3",
+                    "5",
+                    "1"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Slack variables always have 0 coefficients in the objective function.",
+                    incorrect: "Only decision variables have non-zero coefficients in the original objective."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "For the equation X1 + 3X2 = 15 in a maximization problem, what would be added?",
+                options: [
+                    "Artificial variable A1 with coefficient -M",
+                    "Slack variable S1 with coefficient 0",
+                    "Surplus variable S1 with coefficient 0",
+                    "Nothing needs to be added"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Equality constraints require artificial variables with large negative coefficients.",
+                    incorrect: "Equality constraints need artificial variables since they can't use slack/surplus."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "How is the leaving variable determined in simplex method?",
+                options: [
+                    "Minimum non-negative ratio of Solution to pivot column",
+                    "Maximum ratio of Solution to pivot column",
+                    "Variable with smallest Cj - Zj",
+                    "Variable with largest coefficient in pivot column"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! The minimum ratio test preserves feasibility by keeping all variables non-negative.",
+                    incorrect: "The leaving variable is found using the minimum ratio test, not maximum or other criteria."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "In the tableau, if X2 column is [3, 1] and Solution is [12, 4], what is the ratio for X2?",
+                options: [
+                    "4 and 4",
+                    "12 and 4",
+                    "3 and 1",
+                    "4 and 12"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Ratios are 12/3=4 and 4/1=4.",
+                    incorrect: "Ratios are calculated as Solution value divided by corresponding pivot column value."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "What does it mean if an artificial variable remains in the final basis?",
+                options: [
+                    "The problem is infeasible",
+                    "Multiple optimal solutions exist",
+                    "The solution is unbounded",
+                    "The problem has degeneracy"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Artificial variables in final basis indicate no feasible solution satisfies all constraints.",
+                    incorrect: "Artificial variables should leave the basis; their presence indicates infeasibility."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "In minimization problems, when is the solution optimal?",
+                options: [
+                    "When all Cj - Zj ≥ 0",
+                    "When all Cj - Zj ≤ 0",
+                    "When all artificial variables leave",
+                    "When all slack variables are zero"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! In minimization, we want no variable that can decrease the objective (all Cj - Zj ≥ 0).",
+                    incorrect: "The optimality condition is reversed for minimization compared to maximization."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "What is degeneracy in simplex method?",
+                options: [
+                    "A basic variable has value 0 in the solution",
+                    "An artificial variable remains in basis",
+                    "Cj - Zj = 0 for all variables",
+                    "The problem has no feasible solution"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Degeneracy occurs when a basic variable equals zero, potentially causing cycling.",
+                    incorrect: "Degeneracy is about zero-valued basic variables, not artificial variables or infeasibility."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "When solving minimization with Big-M, what coefficient is assigned to artificial variables?",
+                options: [
+                    "+M",
+                    "-M",
+                    "0",
+                    "1"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Minimization problems use +M to penalize artificial variables in the objective.",
+                    incorrect: "The sign is reversed for minimization (+M) compared to maximization (-M)."
+                }
+            },
+
+            // Advanced Questions (21-30)
+            {
+                difficulty: "advanced",
+                question: "For the problem: Maximize Z = 3X1 + 2X2, subject to X1 ≤ 4, X2 ≤ 6, 3X1 + 2X2 ≤ 18, what is the initial basis?",
+                options: [
+                    "S1, S2, S3",
+                    "X1, X2, S3",
+                    "A1, A2, A3",
+                    "S1, S2, A3"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! All constraints are ≤, so slack variables S1, S2, S3 form the initial basis.",
+                    incorrect: "Only slack variables are needed when all constraints are ≤ types."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "Convert the constraint -2X1 + 3X2 ≥ -6 to standard form:",
+                options: [
+                    "2X1 - 3X2 ≤ 6",
+                    "-2X1 + 3X2 - S1 = -6",
+                    "2X1 - 3X2 + S1 = 6",
+                    "-2X1 + 3X2 + S1 = 6"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Multiply both sides by -1 to make RHS positive, then it becomes ≤ constraint.",
+                    incorrect: "First make RHS positive by multiplying by -1 (which reverses inequality), then treat as ≤."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "For the problem: Maximize Z = X1 + 5X2, subject to 3X1 + 4X2 ≤ 6, X1 + 3X2 ≥ 2, what artificial variable is needed?",
+                options: [
+                    "A1 for the second constraint",
+                    "A1 for the first constraint",
+                    "A1 and A2 for both constraints",
+                    "No artificial variables needed"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Only the ≥ constraint needs an artificial variable; ≤ constraints use slack variables.",
+                    incorrect: "Artificial variables are only needed for = and ≥ constraints, not ≤ constraints."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "In Big-M method, if an artificial variable remains in basis at optimality with value 0, what does it indicate?",
+                options: [
+                    "Degenerate solution",
+                    "Infeasible problem",
+                    "Unbounded solution",
+                    "Redundant constraint"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Artificial variable at zero level indicates degeneracy, not necessarily infeasibility.",
+                    incorrect: "Only non-zero artificial variables in final basis indicate infeasibility."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What indicates an unbounded solution in simplex method?",
+                options: [
+                    "All entries in pivot column ≤ 0 when selecting entering variable",
+                    "All Cj - Zj ≤ 0",
+                    "Artificial variable remains in basis",
+                    "Slack variables are all zero"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! No positive ratios can be calculated when pivot column has all non-positive entries.",
+                    incorrect: "Unboundedness is detected during ratio test, not from Cj - Zj or artificial variables."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "For the problem: Minimize Z = X1 + X2, subject to 2X1 + 4X2 ≥ 4, X1 + 7X2 ≥ 7, how many artificial variables are needed?",
+                options: [
+                    "2",
+                    "1",
+                    "0",
+                    "3"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Both constraints are ≥, requiring one artificial variable each.",
+                    incorrect: "Each ≥ constraint needs its own artificial variable in minimization problems."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "In the optimal tableau for a maximization problem, if X3 (non-basic) has Cj - Zj = 0, what does this imply?",
+                options: [
+                    "Alternative optimal solutions exist",
+                    "The solution is degenerate",
+                    "The problem is infeasible",
+                    "The solution is unbounded"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Zero reduced cost for non-basic variable means multiple optimal solutions exist.",
+                    incorrect: "Zero reduced cost indicates alternative optima, not degeneracy or infeasibility."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "For the constraint 4X1 - X2 ≤ -8, what is the proper standard form conversion?",
+                options: [
+                    "-4X1 + X2 ≥ 8 then add surplus and artificial",
+                    "4X1 - X2 + S1 = -8",
+                    "-4X1 + X2 + S1 = 8",
+                    "4X1 - X2 - S1 = -8"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! First multiply by -1 to make RHS positive (reversing inequality), then treat as ≥ constraint.",
+                    incorrect: "First make RHS positive, then handle as ≥ constraint requiring surplus and artificial variables."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What is the maximum number of basic variables in a problem with 3 decision variables and 4 constraints?",
+                options: [
+                    "4",
+                    "3",
+                    "7",
+                    "12"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Number of basic variables equals number of constraints in standard form.",
+                    incorrect: "Basic variables correspond to constraints, not decision variables, in simplex method."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "Given the problem: Maximize Z = 2X1 + 3X2, subject to X1 + X2 ≤ 4, 2X1 + X2 ≤ 5, what is the value of Z at the optimal solution?",
+                options: [
+                    "8",
+                    "7",
+                    "9",
+                    "6"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! The optimal solution occurs at X1=1, X2=2 with Z=2(1)+3(2)=8.",
+                    incorrect: "This requires solving the problem completely through simplex iterations to find the maximum Z value."
+                }
+            }
+        ];
+
+        // Randomize the correct answers
+        questions.forEach(q => {
+            const correctOption = q.options[q.correctAnswer];
+            // Shuffle options
+            for (let i = q.options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+            }
+            // Update correct answer index
+            q.correctAnswer = q.options.indexOf(correctOption);
+        });
+
+        // Quiz state variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = Array(questions.length).fill(null);
+        let quizStarted = false;
+
+        // DOM elements
+        const startScreen = document.querySelector('.start-screen');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const difficultyTag = document.getElementById('difficulty-tag');
+        const correctExplanation = document.getElementById('correct-explanation');
+        const incorrectExplanation = document.getElementById('incorrect-explanation');
+        const progressBar = document.getElementById('progress-bar');
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        // Initialize the quiz
+        function initQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = Array(questions.length).fill(null);
+            loadQuestion();
+            updateProgressBar();
+            updateNavigationButtons();
+        }
+
+        // Load the current question
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            
+            // Set question text and difficulty
+            questionText.textContent = question.question;
+            difficultyTag.textContent = question.difficulty;
+            difficultyTag.className = 'difficulty-tag ' + question.difficulty;
+            
+            // Clear previous options and explanations
+            optionsContainer.innerHTML = '';
+            correctExplanation.style.display = 'none';
+            incorrectExplanation.style.display = 'none';
+            
+            // Create options
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.textContent = option;
+                optionElement.dataset.index = index;
+                
+                // Highlight if already answered
+                if (userAnswers[currentQuestionIndex] !== null) {
+                    if (index === question.correctAnswer) {
+                        optionElement.classList.add('correct');
+                    } else if (index === userAnswers[currentQuestionIndex] && index !== question.correctAnswer) {
+                        optionElement.classList.add('incorrect');
+                    }
+                }
+                
+                optionElement.addEventListener('click', () => selectOption(index));
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Show explanations if already answered
+            if (userAnswers[currentQuestionIndex] !== null) {
+                showExplanations();
+            }
+        }
+
+        // Handle option selection
+        function selectOption(optionIndex) {
+            // Only allow selection if not already answered
+            if (userAnswers[currentQuestionIndex] !== null) return;
+            
+            const question = questions[currentQuestionIndex];
+            userAnswers[currentQuestionIndex] = optionIndex;
+            
+            // Update score if correct
+            if (optionIndex === question.correctAnswer) {
+                score++;
+            }
+            
+            // Highlight selected option
+            const options = document.querySelectorAll('.option');
+            options.forEach((option, index) => {
+                if (index === optionIndex) {
+                    option.classList.add(index === question.correctAnswer ? 'correct' : 'incorrect');
+                }
+                if (index === question.correctAnswer && index !== optionIndex) {
+                    option.classList.add('correct');
+                }
+            });
+            
+            // Show explanations
+            showExplanations();
+            updateProgressBar();
+            updateNavigationButtons();
+        }
+
+        // Show explanations for the current question
+        function showExplanations() {
+            const question = questions[currentQuestionIndex];
+            const userAnswer = userAnswers[currentQuestionIndex];
+            
+            correctExplanation.textContent = question.explanation.correct;
+            correctExplanation.style.display = 'block';
+            
+            if (userAnswer !== question.correctAnswer) {
+                incorrectExplanation.textContent = question.explanation.incorrect;
+                incorrectExplanation.style.display = 'block';
+            }
+        }
+
+        // Update navigation buttons state
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.textContent = 'Finish';
+            } else {
+                nextBtn.textContent = 'Next';
+            }
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const answeredCount = userAnswers.filter(answer => answer !== null).length;
+            const progress = (answeredCount / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Show quiz results
+        function showResults() {
+            const percentage = Math.round((score / questions.length) * 100);
+            finalScore.textContent = `${score}/${questions.length} (${percentage}%)`;
+            
+            if (percentage >= 80) {
+                resultMessage.textContent = 'Simplex Method Expert! You have mastered LP solutions.';
+            } else if (percentage >= 60) {
+                resultMessage.textContent = 'Strong performance! You understand most concepts but could review some areas.';
+            } else if (percentage >= 40) {
+                resultMessage.textContent = 'Good effort! Focus on the explanations to improve your knowledge.';
+            } else {
+                resultMessage.textContent = 'Keep studying! Review Chapter 4 materials and try again.';
+            }
+            
+            quizContainer.style.display = 'none';
+            resultScreen.style.display = 'block';
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            startScreen.style.display = 'none';
+            quizContainer.style.display = 'block';
+            quizStarted = true;
+            initQuiz();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                updateNavigationButtons();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                updateNavigationButtons();
+            } else {
+                showResults();
+            }
+        });
+
+        restartBtn.addEventListener('click', () => {
+            resultScreen.style.display = 'none';
+            initQuiz();
+        });
+
+        // Initialize
+        if (!quizStarted) {
+            startScreen.style.display = 'block';
+            quizContainer.style.display = 'none';
+            resultScreen.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
