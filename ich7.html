@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fish Myotomal Structure Mastery Quiz</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --error-color: #f44336;
+            --success-color: #4CAF50;
+            --border-color: #333;
+            --option-bg: #2a2a2a;
+            --option-hover: #3a3a3a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .quiz-container {
+            display: none;
+        }
+
+        .question-container {
+            margin-bottom: 2rem;
+        }
+
+        .difficulty-tag {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .basic {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .intermediate {
+            background-color: #FF9800;
+            color: white;
+        }
+
+        .advanced {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .option {
+            padding: 1rem;
+            background-color: var(--option-bg);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+        }
+
+        .option:hover {
+            background-color: var(--option-hover);
+        }
+
+        .option.correct {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .option.incorrect {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .explanation {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        .correct-explanation {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .incorrect-explanation {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3e8e41;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #0b7dda;
+        }
+
+        .start-screen, .result-screen {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .result-screen {
+            display: none;
+        }
+
+        .score {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: var(--border-color);
+            border-radius: 5px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="start-screen">
+            <h1>Fish Myotomal Structure Mastery Quiz</h1>
+            <p>Test your understanding of fish muscle structure and function.</p>
+            <button class="btn-primary" id="start-btn">Start Quiz</button>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress-bar"></div>
+            </div>
+            
+            <div class="question-container">
+                <div class="difficulty-tag" id="difficulty-tag"></div>
+                <div class="question-text" id="question-text"></div>
+                
+                <div class="options-container" id="options-container"></div>
+                
+                <div class="explanation correct-explanation" id="correct-explanation"></div>
+                <div class="explanation incorrect-explanation" id="incorrect-explanation"></div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn-secondary" id="prev-btn" disabled>Previous</button>
+                <button class="btn-primary" id="next-btn">Next</button>
+            </div>
+        </div>
+
+        <div class="result-screen" id="result-screen">
+            <h1>Quiz Completed!</h1>
+            <div class="score" id="final-score"></div>
+            <p id="result-message"></p>
+            <button class="btn-primary" id="restart-btn">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz questions data
+        const questions = [
+            // Basic Questions (1-10)
+            {
+                difficulty: "basic",
+                question: "What is the shape of fish myomeres when viewed from the side?",
+                options: [
+                    "Simple V-shape",
+                    "W-shape on its side",
+                    "Circular shape",
+                    "Straight lines"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Fish myomeres are shaped like a W on its side, fitting into one another like cones.",
+                    incorrect: "The W-shape is distinctive to fish myomeres, unlike the simpler V-shape in Amphioxus."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What separates the myomeres on the right and left halves of a fish's body?",
+                options: [
+                    "Horizontal septum",
+                    "Vertical septum",
+                    "Myoseptum",
+                    "Dorsal fin"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! The vertical septum separates left and right myomeres.",
+                    incorrect: "The horizontal septum separates dorsal and ventral muscles, not left and right sides."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What are the upper muscles of a fish called?",
+                options: [
+                    "Hypaxial muscles",
+                    "Epaxial muscles",
+                    "Ventral muscles",
+                    "Lateral muscles"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! The upper muscles are called epaxial muscles.",
+                    incorrect: "Hypaxial refers to the lower muscles, not the upper ones."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What color are the slow-twitch muscle fibers in fish?",
+                options: [
+                    "White",
+                    "Red",
+                    "Pink",
+                    "Blue"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Slow-twitch fibers are red due to high myoglobin content.",
+                    incorrect: "White fibers are fast-twitch, while pink are intermediate between red and white."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "In most fish, where is the red muscle located?",
+                options: [
+                    "Deep in the center of the body",
+                    "In a thin sheet along the mid-lateral aspect",
+                    "Only near the tail fin",
+                    "Evenly distributed throughout the body"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Red muscle typically forms a thin lateral sheet, except in some fish like tuna.",
+                    incorrect: "Deep central location is characteristic of tuna, not most fish."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What is the primary energy source for red muscle fibers?",
+                options: [
+                    "Glycogen (anaerobic)",
+                    "Lipid (aerobic)",
+                    "Protein (catabolic)",
+                    "Creatine phosphate"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Red muscle uses lipids aerobically for sustained activity.",
+                    incorrect: "Glycogen is used anaerobically by white muscle for burst activity."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What structure separates the dorsal and ventral muscles in fish?",
+                options: [
+                    "Vertical septum",
+                    "Horizontal septum",
+                    "Myoseptum",
+                    "Neural spine"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! The horizontal septum divides epaxial (dorsal) and hypaxial (ventral) muscles.",
+                    incorrect: "The vertical septum separates left and right sides, not dorsal and ventral."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What is the connective tissue between myomeres called?",
+                options: [
+                    "Myoglobin",
+                    "Myoseptum",
+                    "Sarcolemma",
+                    "Endomysium"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Myoseptum is the connective tissue separating myomeres.",
+                    incorrect: "These other terms refer to different muscle structures."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "Which type of fish has red muscle that extends deeper into the body?",
+                options: [
+                    "Goldfish",
+                    "Tuna",
+                    "Catfish",
+                    "Anglerfish"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Tuna have red muscle extending deeper, unlike most fish where it's superficial.",
+                    incorrect: "These other fish typically have the more common superficial red muscle distribution."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What is the third type of muscle fiber found in some fish, between red and white?",
+                options: [
+                    "Blue fibers",
+                    "Pink fibers",
+                    "Gray fibers",
+                    "Yellow fibers"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Pink fibers are intermediate between red and white muscle.",
+                    incorrect: "These color terms aren't used to describe intermediate muscle fibers."
+                }
+            },
+
+            // Intermediate Questions (11-20)
+            {
+                difficulty: "intermediate",
+                question: "Why do red muscle fibers have a darker color compared to white fibers?",
+                options: [
+                    "Higher myoglobin content",
+                    "More mitochondria",
+                    "Greater blood supply",
+                    "All of the above"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! All these factors contribute to the darker color of red muscle.",
+                    incorrect: "While each is true separately, the complete answer includes all these factors."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "What would happen if a fish had only white muscle fibers?",
+                options: [
+                    "Could only perform burst swimming",
+                    "Would be unable to maintain prolonged swimming",
+                    "Would fatigue quickly during sustained activity",
+                    "All of the above"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! White muscle alone would limit the fish to short bursts with poor endurance.",
+                    incorrect: "While each is true, the complete answer includes all these limitations."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "How does the W-shaped myomere arrangement benefit fish?",
+                options: [
+                    "Increases force transmission during swimming",
+                    "Allows more complex body movements",
+                    "Provides structural stability",
+                    "All of the above"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! The W-shape provides multiple functional advantages for swimming fish.",
+                    incorrect: "While each benefit is real, the complete answer includes all of them."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "At what swimming speeds would you expect pink muscle to be primarily active?",
+                options: [
+                    "Only during bursts of maximum speed",
+                    "During slow, sustained swimming",
+                    "At intermediate speeds between slow and fast",
+                    "Only when the fish is stationary"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Pink muscle activates at intermediate speeds between what red and white muscles handle.",
+                    incorrect: "Pink muscle isn't for extremes (very slow or very fast) or stationary periods."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "What would electromyograms show when a fish is swimming slowly?",
+                options: [
+                    "Activity only in white muscle",
+                    "Activity only in red muscle",
+                    "Activity in both red and white muscle",
+                    "No muscle activity"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Slow swimming primarily activates red muscle, as shown in herring studies.",
+                    incorrect: "White muscle activates during bursts, not slow swimming."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "Why do tuna have deeper red muscle compared to most fish?",
+                options: [
+                    "To support their continuous swimming lifestyle",
+                    "Because they are larger than other fish",
+                    "To compensate for their lack of white muscle",
+                    "Because they live in deeper water"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Tuna's continuous swimming requires more aerobic red muscle distributed deeper.",
+                    incorrect: "Size and depth aren't the primary reasons; it's their swimming behavior."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "What is the primary functional difference between red and white muscle fibers?",
+                options: [
+                    "Red for slow sustained activity, white for fast bursts",
+                    "Red for fast bursts, white for slow sustained activity",
+                    "Both work the same but in different body regions",
+                    "Red for digestion, white for swimming"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Red fibers are oxidative/slow for endurance, white are glycolytic/fast for power.",
+                    incorrect: "The functions aren't reversed - red is definitely for sustained activity."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "How does the arrangement of myomeres contribute to fish movement?",
+                options: [
+                    "Allows sequential contraction for undulatory swimming",
+                    "Provides attachment points for fins",
+                    "Creates compartments for different muscle types",
+                    "All of the above"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! Myomere arrangement serves multiple functional purposes in fish movement.",
+                    incorrect: "While each is true, the complete answer includes all these contributions."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "Why do white muscle fibers have relatively poor blood supply?",
+                options: [
+                    "They rely on anaerobic metabolism",
+                    "They are smaller than red fibers",
+                    "They contain more mitochondria",
+                    "They are located deeper in the body"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! White fibers use anaerobic glycolysis, needing less oxygen delivery.",
+                    incorrect: "White fibers are actually larger and have fewer mitochondria than red fibers."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "In a cross-section, how do myotomes appear?",
+                options: [
+                    "As distinct W-shaped segments",
+                    "As groups of concentric rings",
+                    "As radial spokes",
+                    "As irregular polygons"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Cross-sections show myotomes as concentric rings due to their conical structure.",
+                    incorrect: "The W-shape is visible from the side, not in cross-section."
+                }
+            },
+
+            // Advanced Questions (21-30)
+            {
+                difficulty: "advanced",
+                question: "Why might a fish evolve to have more red muscle mass?",
+                options: [
+                    "If it's a continuous swimmer like tuna",
+                    "If it inhabits environments requiring sustained swimming",
+                    "If it migrates long distances",
+                    "All of the above"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! All these ecological factors could select for increased red muscle.",
+                    incorrect: "While each scenario could lead to more red muscle, the complete answer includes all."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "How does the conical structure of myomeres affect force transmission?",
+                options: [
+                    "Allows force to be transmitted obliquely to the backbone",
+                    "Creates more direct pull on the vertebral column",
+                    "Distributes force evenly across multiple vertebrae",
+                    "All of the above"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! The conical structure provides multiple mechanical advantages for swimming.",
+                    incorrect: "While each benefit occurs, the complete answer includes all these effects."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What would be the consequence if a fish's myosepta were more elastic?",
+                options: [
+                    "More energy would be stored during bending",
+                    "Swimming efficiency might increase",
+                    "Recovery from bends would be faster",
+                    "All of the above"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! Elastic myosepta could provide multiple performance benefits.",
+                    incorrect: "While each is plausible, the complete answer includes all possibilities."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "Why do some fish show mixed muscle activity patterns while others segregate red/white use?",
+                options: [
+                    "Different evolutionary adaptations to swimming styles",
+                    "Variations in metabolic demands",
+                    "Differences in body shape and ecology",
+                    "All of the above"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! Multiple ecological and physiological factors explain these differences.",
+                    incorrect: "While each contributes, the complete answer includes all these factors."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "How might temperature affect the red/white muscle usage in ectothermic fish?",
+                options: [
+                    "Colder water might increase red muscle reliance",
+                    "Warmer water might allow more white muscle use",
+                    "Temperature changes could shift the crossover point between muscle types",
+                    "All of the above"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! Temperature affects muscle physiology and usage patterns in multiple ways.",
+                    incorrect: "While each effect occurs, the complete answer includes all temperature influences."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What advantage does the W-shaped myomere provide over Amphioxus's simpler V-shape?",
+                options: [
+                    "Greater mechanical advantage for swimming",
+                    "More complex bending patterns possible",
+                    "Better force transmission to the backbone",
+                    "All of the above"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! The more complex W-shape provides multiple hydrodynamic advantages.",
+                    incorrect: "While each benefit exists, the complete answer includes all these improvements."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "Why might pink muscle be absent in some fish species?",
+                options: [
+                    "Their swimming behavior doesn't require intermediate speeds",
+                    "They've optimized for either endurance or burst speed",
+                    "Their ecological niche favors binary muscle use",
+                    "All of the above"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! Multiple ecological and behavioral factors could make pink muscle unnecessary.",
+                    incorrect: "While each reason is valid, the complete answer includes all possibilities."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "How does the orientation of muscle fibers within myomeres affect swimming?",
+                options: [
+                    "Allows graded contraction along body length",
+                    "Enables wave-like force propagation",
+                    "Permits differential bending along the body",
+                    "All of the above"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! Fiber orientation contributes to multiple aspects of undulatory swimming.",
+                    incorrect: "While each effect occurs, the complete answer includes all these contributions."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What might happen if a fish's horizontal septum were damaged?",
+                options: [
+                    "Impaired separation of dorsal/ventral muscle function",
+                    "Reduced swimming efficiency",
+                    "Altered force transmission during bends",
+                    "All of the above"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! The horizontal septum serves multiple functional roles in swimming mechanics.",
+                    incorrect: "While each consequence is likely, the complete answer includes all possibilities."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "Why is the red muscle's superficial location in most fish advantageous?",
+                options: [
+                    "Closer to skin for faster temperature changes",
+                    "Better positioned for sustained steering adjustments",
+                    "More direct access to oxygen from water",
+                    "All of the above"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Superficial location helps with continuous steering and minor adjustments.",
+                    incorrect: "While some factors may contribute, positioning for steering is the primary advantage."
+                }
+            }
+        ];
+
+        // Randomize the correct answers with distribution control
+        function shuffleQuestions() {
+            let lastCorrectPositions = [];
+            
+            questions.forEach(q => {
+                const correctOption = q.options[q.correctAnswer];
+                
+                // Keep shuffling until we meet the distribution requirements
+                let isValidShuffle = false;
+                while (!isValidShuffle) {
+                    // Fisher-Yates shuffle
+                    for (let i = q.options.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+                    }
+                    
+                    // Update correct answer index
+                    const newPosition = q.options.indexOf(correctOption);
+                    
+                    // Check if this position has been used too much recently
+                    const recentOccurrences = lastCorrectPositions.filter(pos => pos === newPosition).length;
+                    if (recentOccurrences < 3) {
+                        q.correctAnswer = newPosition;
+                        lastCorrectPositions.push(newPosition);
+                        if (lastCorrectPositions.length > 5) {
+                            lastCorrectPositions.shift();
+                        }
+                        isValidShuffle = true;
+                    }
+                }
+            });
+        }
+
+        shuffleQuestions();
+
+        // Quiz state variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = Array(questions.length).fill(null);
+        let quizStarted = false;
+
+        // DOM elements
+        const startScreen = document.querySelector('.start-screen');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const difficultyTag = document.getElementById('difficulty-tag');
+        const correctExplanation = document.getElementById('correct-explanation');
+        const incorrectExplanation = document.getElementById('incorrect-explanation');
+        const progressBar = document.getElementById('progress-bar');
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        // Initialize the quiz
+        function initQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = Array(questions.length).fill(null);
+            loadQuestion();
+            updateProgressBar();
+            updateNavigationButtons();
+            quizContainer.style.display = 'block';
+            resultScreen.style.display = 'none';
+        }
+
+        // Load the current question
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            
+            // Set question text and difficulty
+            questionText.textContent = question.question;
+            difficultyTag.textContent = question.difficulty;
+            difficultyTag.className = 'difficulty-tag ' + question.difficulty;
+            
+            // Clear previous options and explanations
+            optionsContainer.innerHTML = '';
+            correctExplanation.style.display = 'none';
+            incorrectExplanation.style.display = 'none';
+            
+            // Create options
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.textContent = option;
+                optionElement.dataset.index = index;
+                
+                // Highlight if already answered
+                if (userAnswers[currentQuestionIndex] !== null) {
+                    if (index === question.correctAnswer) {
+                        optionElement.classList.add('correct');
+                    } else if (index === userAnswers[currentQuestionIndex] && index !== question.correctAnswer) {
+                        optionElement.classList.add('incorrect');
+                    }
+                }
+                
+                optionElement.addEventListener('click', () => selectOption(index));
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Show explanations if already answered
+            if (userAnswers[currentQuestionIndex] !== null) {
+                showExplanations();
+            }
+        }
+
+        // Handle option selection
+        function selectOption(optionIndex) {
+            // Only allow selection if not already answered
+            if (userAnswers[currentQuestionIndex] !== null) return;
+            
+            const question = questions[currentQuestionIndex];
+            userAnswers[currentQuestionIndex] = optionIndex;
+            
+            // Update score if correct
+            if (optionIndex === question.correctAnswer) {
+                score++;
+            }
+            
+            // Highlight selected option
+            const options = document.querySelectorAll('.option');
+            options.forEach((option, index) => {
+                if (index === optionIndex) {
+                    option.classList.add(index === question.correctAnswer ? 'correct' : 'incorrect');
+                }
+                if (index === question.correctAnswer && index !== optionIndex) {
+                    option.classList.add('correct');
+                }
+            });
+            
+            // Show explanations
+            showExplanations();
+            updateProgressBar();
+            updateNavigationButtons();
+        }
+
+        // Show explanations for the current question
+        function showExplanations() {
+            const question = questions[currentQuestionIndex];
+            const userAnswer = userAnswers[currentQuestionIndex];
+            
+            correctExplanation.textContent = question.explanation.correct;
+            correctExplanation.style.display = 'block';
+            
+            if (userAnswer !== question.correctAnswer) {
+                incorrectExplanation.textContent = question.explanation.incorrect;
+                incorrectExplanation.style.display = 'block';
+            }
+        }
+
+        // Update navigation buttons state
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.textContent = 'Finish';
+            } else {
+                nextBtn.textContent = 'Next';
+            }
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Show quiz results
+        function showResults() {
+            const percentage = Math.round((score / questions.length) * 100);
+            finalScore.textContent = `${score}/${questions.length} (${percentage}%)`;
+            
+            if (percentage >= 80) {
+                resultMessage.textContent = 'Myotomal Master! You have an exceptional understanding of fish muscle structure.';
+            } else if (percentage >= 60) {
+                resultMessage.textContent = 'Strong performance! You understand most concepts but could review some areas.';
+            } else if (percentage >= 40) {
+                resultMessage.textContent = 'Good effort! Focus on the explanations to improve your knowledge.';
+            } else {
+                resultMessage.textContent = 'Keep studying! Review the lecture materials and try again.';
+            }
+            
+            quizContainer.style.display = 'none';
+            resultScreen.style.display = 'block';
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            startScreen.style.display = 'none';
+            quizStarted = true;
+            initQuiz();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                updateNavigationButtons();
+                updateProgressBar();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                updateNavigationButtons();
+                updateProgressBar();
+            } else {
+                showResults();
+            }
+        });
+
+        restartBtn.addEventListener('click', () => {
+            initQuiz();
+        });
+
+        // Initialize
+        if (!quizStarted) {
+            startScreen.style.display = 'block';
+            quizContainer.style.display = 'none';
+            resultScreen.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Osmoregulation Mastery Quiz</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --error-color: #f44336;
+            --success-color: #4CAF50;
+            --border-color: #333;
+            --option-bg: #2a2a2a;
+            --option-hover: #3a3a3a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 500;
+        }
+
+        .quiz-container {
+            display: none;
+        }
+
+        .question-container {
+            margin-bottom: 2rem;
+        }
+
+        .difficulty-tag {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .basic {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .intermediate {
+            background-color: #FF9800;
+            color: white;
+        }
+
+        .advanced {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .option {
+            padding: 1rem;
+            background-color: var(--option-bg);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+        }
+
+        .option:hover {
+            background-color: var(--option-hover);
+        }
+
+        .option.correct {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .option.incorrect {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .explanation {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        .correct-explanation {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .incorrect-explanation {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3e8e41;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #0b7dda;
+        }
+
+        .start-screen, .result-screen {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .result-screen {
+            display: none;
+        }
+
+        .score {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: var(--border-color);
+            border-radius: 5px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="start-screen">
+            <h1>Osmoregulation Mastery Quiz</h1>
+            <p>Test your understanding of osmoregulation and ion balance in animals with this comprehensive quiz.</p>
+            <button class="btn-primary" id="start-btn">Start Quiz</button>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress-bar"></div>
+            </div>
+            
+            <div class="question-container">
+                <div class="difficulty-tag" id="difficulty-tag"></div>
+                <div class="question-text" id="question-text"></div>
+                
+                <div class="options-container" id="options-container"></div>
+                
+                <div class="explanation correct-explanation" id="correct-explanation"></div>
+                <div class="explanation incorrect-explanation" id="incorrect-explanation"></div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn-secondary" id="prev-btn" disabled>Previous</button>
+                <button class="btn-primary" id="next-btn">Next</button>
+            </div>
+        </div>
+
+        <div class="result-screen" id="result-screen">
+            <h1>Quiz Completed!</h1>
+            <div class="score" id="final-score"></div>
+            <p id="result-message"></p>
+            <button class="btn-primary" id="restart-btn">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz questions data
+        const questions = [
+            // Basic Questions (1-10)
+            {
+                difficulty: "basic",
+                question: "What is the definition of osmosis?",
+                options: [
+                    "Water flow through a semipermeable membrane from low to high solute concentration",
+                    "Movement of solutes against their concentration gradient",
+                    "Equal distribution of water molecules in a solution",
+                    "Active transport of water molecules"
+                ],
+                correctAnswer: 0,
+                explanation: {
+                    correct: "Correct! Osmosis is the passive movement of water across a semipermeable membrane from low to high solute concentration.",
+                    incorrect: "Osmosis specifically refers to water movement, not solute movement or active transport."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What is the difference between molarity and osmolarity?",
+                options: [
+                    "Molarity measures charge while osmolarity measures concentration",
+                    "Osmolarity accounts for particle dissociation while molarity doesn't",
+                    "They are identical measurements with different names",
+                    "Molarity is for solids while osmolarity is for liquids"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Osmolarity considers the number of particles when compounds dissociate, while molarity doesn't.",
+                    incorrect: "The key difference is that osmolarity accounts for dissociation of ionic compounds."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What term describes two solutions with the same osmotic concentration?",
+                options: [
+                    "Hyperosmotic",
+                    "Iso-osmotic",
+                    "Hypo-osmotic",
+                    "Isotonic"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Iso-osmotic (or isosmotic) solutions have equal osmotic concentrations.",
+                    incorrect: "Hyperosmotic and hypo-osmotic describe solutions with higher or lower concentrations respectively."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "Which of these marine animals are typically osmoconformers?",
+                options: [
+                    "Marine teleost fish",
+                    "Marine mammals",
+                    "Marine invertebrates and hagfish",
+                    "Marine reptiles"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Marine invertebrates and hagfish are iso-osmotic with seawater and thus conformers.",
+                    incorrect: "Most other marine vertebrates are osmoregulators with different internal concentrations."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What is the main osmotic challenge for marine teleost fish?",
+                options: [
+                    "Gaining water and losing salts",
+                    "Maintaining neutral buoyancy",
+                    "Losing water and gaining salts",
+                    "Preventing urea accumulation"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Marine teleosts have body fluids more dilute than seawater, so they lose water and gain salts.",
+                    incorrect: "This is the opposite of freshwater fish challenges - marine teleosts face dehydration."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "How do marine teleosts compensate for water loss?",
+                options: [
+                    "By absorbing water through their skin",
+                    "By producing concentrated urine",
+                    "By drinking seawater",
+                    "By storing water in their swim bladder"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Marine teleosts drink seawater to replace water lost osmotically.",
+                    incorrect: "They actually produce small amounts of urine and don't have these other mechanisms."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "Where are chloride cells located in fish?",
+                options: [
+                    "In the kidneys",
+                    "In the intestinal lining",
+                    "In the gills",
+                    "In the swim bladder"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Chloride cells in the gills are responsible for active salt secretion.",
+                    incorrect: "These other organs have different osmoregulatory functions."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What is the role of the kidney in marine teleosts?",
+                options: [
+                    "Producing large volumes of dilute urine",
+                    "Maintaining nitrogen balance",
+                    "Excreting divalent ions like Mg²⁺ and SO₄²⁻",
+                    "Secreting urea"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Marine teleost kidneys mainly excrete divalent ions while conserving water.",
+                    incorrect: "Producing dilute urine is a freshwater fish adaptation, not marine."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "How do elasmobranchs maintain osmotic balance?",
+                options: [
+                    "By active salt secretion through their gills",
+                    "By drinking large amounts of seawater",
+                    "By producing very dilute urine",
+                    "By retaining urea and TMAO in their blood"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! Elasmobranchs use urea and TMAO to raise blood osmolarity to match seawater.",
+                    incorrect: "These are strategies used by other marine organisms, not elasmobranchs."
+                }
+            },
+            {
+                difficulty: "basic",
+                question: "What organ do elasmobranchs use for salt excretion?",
+                options: [
+                    "Kidney",
+                    "Gills",
+                    "Liver",
+                    "Rectal gland"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! The rectal gland is a specialized salt-excreting organ in elasmobranchs.",
+                    incorrect: "While these other organs have roles, the rectal gland is unique to elasmobranchs for salt excretion."
+                }
+            },
+
+            // Intermediate Questions (11-20)
+            {
+                difficulty: "intermediate",
+                question: "What is the osmolarity of a 1M NaCl solution?",
+                options: [
+                    "1 Osm",
+                    "0.5 Osm",
+                    "~2 Osm",
+                    "Cannot be determined"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! NaCl dissociates into Na⁺ and Cl⁻, so 1M NaCl ≈ 2 Osm.",
+                    incorrect: "Non-dissociating compounds would be 1 Osm at 1M, but NaCl dissociates into two particles."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "According to the standing gradient hypothesis, how is water absorbed in marine teleosts?",
+                options: [
+                    "Active transport pumps move water directly against its gradient",
+                    "Water diffuses passively through lipid membranes",
+                    "Local osmotic gradients in intercellular spaces drive water movement",
+                    "Hydrostatic pressure from drinking forces water absorption"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! The standing gradient hypothesis proposes local osmotic gradients in narrow spaces drive water flow.",
+                    incorrect: "Water isn't actively transported directly - the gradients are created by ion transport."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "How do freshwater teleosts maintain salt balance?",
+                options: [
+                    "Drinking large amounts of freshwater",
+                    "Producing concentrated urine",
+                    "Active uptake of salts at the gills",
+                    "Storing salts in specialized organs"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Freshwater teleosts actively take up Na⁺ and Cl⁻ at their gills to replace lost salts.",
+                    incorrect: "They actually drink little water and produce dilute urine, opposite of these options."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "What nitrogenous waste product do freshwater teleosts primarily excrete through their gills?",
+                options: [
+                    "Urea",
+                    "Uric acid",
+                    "Ammonia (NH₃)",
+                    "Trimethylamine oxide"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Most teleosts excrete nitrogen as NH₃ through their gills.",
+                    incorrect: "These other compounds are used by different organisms (elasmobranchs, mammals, birds/reptiles)."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "What is the typical urine osmolarity of a marine teleost compared to its blood?",
+                options: [
+                    "Much higher",
+                    "Much lower",
+                    "Similar or slightly lower",
+                    "Identical to seawater"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Marine teleosts produce small amounts of isosmotic or slightly hyposmotic urine.",
+                    incorrect: "They don't produce highly concentrated or dilute urine like some other organisms."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "How does the kidney of marine teleosts compare to freshwater teleosts?",
+                options: [
+                    "More glomeruli in marine species",
+                    "Larger in marine species",
+                    "Fewer or no glomeruli in marine species",
+                    "No functional difference"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Marine teleosts often have reduced or lost glomeruli as they don't need high filtration rates.",
+                    incorrect: "Freshwater teleosts actually have more developed glomeruli for high urine production."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "What is the primary function of the rectal gland in elasmobranchs?",
+                options: [
+                    "Absorb water",
+                    "Produce urea",
+                    "Excrete excess NaCl",
+                    "Store TMAO"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! The rectal gland actively secretes concentrated NaCl solution.",
+                    incorrect: "These other functions are performed by different organs/systems in elasmobranchs."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "How do marine reptiles and birds typically excrete excess salt?",
+                options: [
+                    "Through their skin",
+                    "Through specialized gills",
+                    "Through salt glands",
+                    "Through highly concentrated urine"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Most marine reptiles and birds have salt glands that excrete concentrated salt solutions.",
+                    incorrect: "Their kidneys generally can't produce highly concentrated urine like mammals can."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "Where are salt glands typically located in marine turtles?",
+                options: [
+                    "In the mouth",
+                    "At the base of the fins",
+                    "Near the eyes",
+                    "Along the intestinal tract"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Marine turtles have salt glands near their eyes that excrete concentrated salt solutions.",
+                    incorrect: "These other locations don't contain the specialized salt glands."
+                }
+            },
+            {
+                difficulty: "intermediate",
+                question: "How do marine mammals typically handle salt balance?",
+                options: [
+                    "Excrete salt through specialized glands",
+                    "Store excess salt in fatty tissues",
+                    "Avoid drinking seawater entirely",
+                    "Produce highly concentrated urine"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! Marine mammals have kidneys that can produce urine more concentrated than seawater.",
+                    incorrect: "They generally don't have salt glands and do ingest some seawater incidentally."
+                }
+            },
+
+            // Advanced Questions (21-30)
+            {
+                difficulty: "advanced",
+                question: "Why can't most marine reptiles produce urine more concentrated than their blood?",
+                options: [
+                    "Their nephrons are too short",
+                    "They lack the loop of Henle in their kidneys",
+                    "They have reduced glomerular filtration rates",
+                    "Their cloaca reabsorbs too much water"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! The loop of Henle is necessary for urine concentration, and most reptiles lack this structure.",
+                    incorrect: "These other factors aren't the primary reason for their inability to concentrate urine."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What is the approximate blood osmolarity of a typical marine teleost compared to seawater (1000 mOsm)?",
+                options: [
+                    "600-700 mOsm",
+                    "900-1000 mOsm",
+                    "300-400 mOsm",
+                    "1200-1400 mOsm"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Marine teleosts maintain blood at about 1/3 the osmolarity of seawater.",
+                    incorrect: "These other values are characteristic of different marine organisms (elasmobranchs, osmoconformers)."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "How does TMAO help elasmobranchs with osmoregulation?",
+                options: [
+                    "It directly increases the osmotic pressure of blood",
+                    "It binds excess sodium ions for excretion",
+                    "It facilitates water absorption in the gut",
+                    "It counteracts the destabilizing effects of urea on proteins"
+                ],
+                correctAnswer: 3,
+                explanation: {
+                    correct: "Correct! TMAO is a stabilizing solute that protects proteins from urea's denaturing effects.",
+                    incorrect: "While it contributes to osmolarity, its primary role is as a protein stabilizer."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What is the primary ion exchange mechanism in freshwater teleost gills?",
+                options: [
+                    "Na⁺ for K⁺ and Cl⁻ for OH⁻",
+                    "Ca²⁺ for Mg²⁺ and PO₄³⁻ for SO₄²⁻",
+                    "Na⁺ for NH₄⁺ and Cl⁻ for HCO₃⁻",
+                    "H⁺ for O₂ and CO₂ for HCO₃⁻"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Freshwater teleosts exchange Na⁺ for NH₄⁺ and Cl⁻ for HCO₃⁻/OH⁻ at their gills.",
+                    incorrect: "These other exchanges don't represent the primary ion regulation mechanism."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "Why do marine teleosts have reduced glomeruli compared to freshwater species?",
+                options: [
+                    "Their blood pressure is too low for filtration",
+                    "They need to conserve water rather than excrete it",
+                    "Their kidney tubules are more efficient at secretion",
+                    "They excrete nitrogen primarily through their skin"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Marine teleosts face water loss, so they reduce filtration to conserve water.",
+                    incorrect: "These other factors aren't the primary evolutionary reason for glomerular reduction."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What adaptation allows some marine birds to excrete salt concentrations higher than seawater?",
+                options: [
+                    "Modified nephrons with extended loops of Henle",
+                    "Countercurrent multiplication in salt glands",
+                    "Highly vascularized buccal pumps",
+                    "Rectal water reabsorption"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Marine bird salt glands use countercurrent multiplication to excrete hyperosmotic fluids.",
+                    incorrect: "These other mechanisms aren't how salt glands achieve hyperosmotic secretion."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "Why don't marine mammals typically drink large amounts of seawater?",
+                options: [
+                    "Their kidneys can't handle the salt load",
+                    "They get most water from their food and metabolic water",
+                    "Seawater causes digestive issues",
+                    "They lose the ability to taste salt"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Marine mammals derive water from food and metabolic processes, minimizing seawater intake.",
+                    incorrect: "While excess salt is challenging, their kidneys can handle some seawater ingestion."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What evolutionary advantage does urea retention provide elasmobranchs?",
+                options: [
+                    "Enhances their buoyancy control",
+                    "Provides an energy reserve during fasting",
+                    "Allows them to be iso-osmotic without high ion concentrations",
+                    "Protects them from bacterial infections"
+                ],
+                correctAnswer: 2,
+                explanation: {
+                    correct: "Correct! Urea allows elasmobranchs to match seawater osmolarity without high ion levels that would disrupt physiology.",
+                    incorrect: "While urea may have secondary benefits, its primary role is osmotic balance."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "How does the kidney of a freshwater teleost differ functionally from a marine teleost?",
+                options: [
+                    "Secretes rather than absorbs monovalent ions",
+                    "Produces large volumes of dilute urine",
+                    "Contains specialized chloride cells",
+                    "Filters blood at a much lower rate"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Freshwater teleost kidneys produce copious dilute urine to excrete excess water.",
+                    incorrect: "These other characteristics are either opposite of the truth or describe other organs."
+                }
+            },
+            {
+                difficulty: "advanced",
+                question: "What is the primary challenge for diadromous fish that migrate between fresh and saltwater?",
+                options: [
+                    "Maintaining neutral buoyancy in both environments",
+                    "Reversing their osmoregulatory strategies",
+                    "Adjusting their metabolic rate for temperature changes",
+                    "Changing their nitrogen excretion mechanism"
+                ],
+                correctAnswer: 1,
+                explanation: {
+                    correct: "Correct! Migratory fish must completely reverse their osmoregulatory mechanisms when changing environments.",
+                    incorrect: "While these other factors may change, the osmoregulatory switch is the primary challenge."
+                }
+            }
+        ];
+
+        // Randomize the correct answers
+        questions.forEach(q => {
+            const correctOption = q.options[q.correctAnswer];
+            // Shuffle options
+            for (let i = q.options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+            }
+            // Update correct answer index
+            q.correctAnswer = q.options.indexOf(correctOption);
+        });
+
+        // Quiz state variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = Array(questions.length).fill(null);
+        let quizStarted = false;
+
+        // DOM elements
+        const startScreen = document.querySelector('.start-screen');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const difficultyTag = document.getElementById('difficulty-tag');
+        const correctExplanation = document.getElementById('correct-explanation');
+        const incorrectExplanation = document.getElementById('incorrect-explanation');
+        const progressBar = document.getElementById('progress-bar');
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+
+        // Initialize the quiz
+        function initQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = Array(questions.length).fill(null);
+            loadQuestion();
+            updateProgressBar();
+            updateNavigationButtons();
+            quizContainer.style.display = 'block';
+            resultScreen.style.display = 'none';
+        }
+
+        // Load the current question
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            
+            // Set question text and difficulty
+            questionText.textContent = question.question;
+            difficultyTag.textContent = question.difficulty;
+            difficultyTag.className = 'difficulty-tag ' + question.difficulty;
+            
+            // Clear previous options and explanations
+            optionsContainer.innerHTML = '';
+            correctExplanation.style.display = 'none';
+            incorrectExplanation.style.display = 'none';
+            
+            // Create options
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.textContent = option;
+                optionElement.dataset.index = index;
+                
+                // Highlight if already answered
+                if (userAnswers[currentQuestionIndex] !== null) {
+                    if (index === question.correctAnswer) {
+                        optionElement.classList.add('correct');
+                    } else if (index === userAnswers[currentQuestionIndex] && index !== question.correctAnswer) {
+                        optionElement.classList.add('incorrect');
+                    }
+                }
+                
+                optionElement.addEventListener('click', () => selectOption(index));
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Show explanations if already answered
+            if (userAnswers[currentQuestionIndex] !== null) {
+                showExplanations();
+            }
+        }
+
+        // Handle option selection
+        function selectOption(optionIndex) {
+            // Only allow selection if not already answered
+            if (userAnswers[currentQuestionIndex] !== null) return;
+            
+            const question = questions[currentQuestionIndex];
+            userAnswers[currentQuestionIndex] = optionIndex;
+            
+            // Update score if correct
+            if (optionIndex === question.correctAnswer) {
+                score++;
+            }
+            
+            // Highlight selected option
+            const options = document.querySelectorAll('.option');
+            options.forEach((option, index) => {
+                if (index === optionIndex) {
+                    option.classList.add(index === question.correctAnswer ? 'correct' : 'incorrect');
+                }
+                if (index === question.correctAnswer && index !== optionIndex) {
+                    option.classList.add('correct');
+                }
+            });
+            
+            // Show explanations
+            showExplanations();
+            updateProgressBar();
+            updateNavigationButtons();
+        }
+
+        // Show explanations for the current question
+        function showExplanations() {
+            const question = questions[currentQuestionIndex];
+            const userAnswer = userAnswers[currentQuestionIndex];
+            
+            correctExplanation.textContent = question.explanation.correct;
+            correctExplanation.style.display = 'block';
+            
+            if (userAnswer !== question.correctAnswer) {
+                incorrectExplanation.textContent = question.explanation.incorrect;
+                incorrectExplanation.style.display = 'block';
+            }
+        }
+
+        // Update navigation buttons state
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.textContent = 'Finish';
+            } else {
+                nextBtn.textContent = 'Next';
+            }
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Show quiz results
+        function showResults() {
+            const percentage = Math.round((score / questions.length) * 100);
+            finalScore.textContent = `${score}/${questions.length} (${percentage}%)`;
+            
+            if (percentage >= 80) {
+                resultMessage.textContent = 'Osmoregulation Expert! You have mastered water and ion balance in animals.';
+            } else if (percentage >= 60) {
+                resultMessage.textContent = 'Strong performance! You understand most concepts but could review some areas.';
+            } else if (percentage >= 40) {
+                resultMessage.textContent = 'Good effort! Focus on the explanations to improve your knowledge.';
+            } else {
+                resultMessage.textContent = 'Keep studying! Review the lecture materials and try again.';
+            }
+            
+            quizContainer.style.display = 'none';
+            resultScreen.style.display = 'block';
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            startScreen.style.display = 'none';
+            quizStarted = true;
+            initQuiz();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+                updateNavigationButtons();
+                updateProgressBar();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                updateNavigationButtons();
+                updateProgressBar();
+            } else {
+                showResults();
+            }
+        });
+
+        restartBtn.addEventListener('click', () => {
+            initQuiz();
+        });
+
+        // Initialize
+        if (!quizStarted) {
+            startScreen.style.display = 'block';
+            quizContainer.style.display = 'none';
+            resultScreen.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
